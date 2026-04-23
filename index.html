@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temporal Patterns of Recorded Flood Events Across Selected UK Cities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1 class="main-title">Temporal Patterns of Recorded Flood Events Across Selected UK Cities</h1>
+      <p class="subtitle">
+        Annual counts are based on unique recorded flood event IDs (<code>rec_grp_id</code>).
+        Each stacked bar shows the seasonal composition of events in that city-year.
+      </p>
+    </header>
+
+    <section class="legend-bar" aria-label="Chart legend">
+      <div class="legend-group">
+        <span class="legend-label">Dominant Season</span>
+        <div class="legend-items" id="season-legend"></div>
+      </div>
+      <div class="legend-group totals" aria-label="Summary totals">
+        <span class="legend-label">Total Recorded Events</span>
+        <div class="legend-items" id="totals-legend"></div>
+      </div>
+    </section>
+
+    <section class="content-split">
+      <aside class="text-box" aria-label="Commentary">
+        <div class="text-box-inner">
+          <h2 class="text-box-title">Notes</h2>
+          <p class="text-box-placeholder">Add your commentary here.</p>
+        </div>
+      </aside>
+      <section id="chart-grid" class="chart-grid" aria-label="Four-city small multiples"></section>
+    </section>
+
+    <footer class="page-footer">
+      <p class="interpretation">
+        <strong>Interpretation:</strong> These counts represent distinct recorded flood events
+        intersecting each city boundary — not flooded area, damage, or risk intensity.
+        Larger areas such as Greater London may naturally contain more recorded events.
+      </p>
+    </footer>
+
+    <div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true"></div>
+    <div id="error-banner" class="error-banner" hidden>Unable to load dataset.</div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
