@@ -33,7 +33,7 @@ html, body {
 .page {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 36px 18px 56px;
+  padding: 36px 30px 56px;
 }
 
 .page-header {
@@ -324,7 +324,7 @@ html, body {
   padding: 12px 14px;
   font-size: 0.82rem;
   line-height: 1.45;
-  max-width: 280px;
+  max-width: 360px;
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -356,9 +356,13 @@ html, body {
 
 .tooltip .tt-row {
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: 82px 1fr;
   gap: 8px;
   margin: 3px 0;
+}
+
+.tooltip .tt-value .nowrap {
+  white-space: nowrap;
 }
 
 .tooltip .tt-label {

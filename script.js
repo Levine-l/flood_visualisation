@@ -320,7 +320,7 @@
       <div class="tt-row"><span class="tt-label">By season</span><span class="tt-value">${breakdown}</span></div>
       <div class="tt-row"><span class="tt-label">Source(s)</span><span class="tt-value">${srcs}</span></div>
       <div class="tt-row"><span class="tt-label">Cause(s)</span><span class="tt-value">${causes}</span></div>
-      ${dateRange ? `<div class="tt-row"><span class="tt-label">Dates</span><span class="tt-value">${dateRange}</span></div>` : ""}
+      ${dateRange ? `<div class="tt-row"><span class="tt-label">Dates</span><span class="tt-value"><span class="nowrap">${dateRange}</span></span></div>` : ""}
     `;
     tooltip.classList.add("visible");
     tooltip.setAttribute("aria-hidden", "false");
