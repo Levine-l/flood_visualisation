@@ -92,84 +92,13 @@
         </p>
       </header>
 
-      <div class="housing-layout">
-        <aside class="housing-controls" aria-label="Layer filters and legend">
-          <div class="control-group">
-            <h4 class="control-heading">Flood zone</h4>
-            <label class="control-row"><input type="checkbox" checked /> <span>Zone A</span></label>
-            <label class="control-row"><input type="checkbox" /> <span>Zone B</span></label>
-          </div>
-          <div class="control-group">
-            <h4 class="control-heading">Layers</h4>
-            <label class="control-row"><input type="checkbox" checked /> <span>Buildings</span></label>
-            <label class="control-row"><input type="checkbox" checked /> <span>OA price</span></label>
-          </div>
-          <div class="control-legend">
-            <h4 class="control-heading">Legend</h4>
-            <ul class="legend-key">
-              <li><span class="key-swatch swatch-zone-a"></span>Flood zone A</li>
-              <li><span class="key-swatch swatch-zone-b"></span>Flood zone B</li>
-              <li><span class="key-swatch swatch-river"></span>River / waterway</li>
-              <li><span class="key-swatch swatch-building"></span>Buildings</li>
-              <li>
-                <span class="key-gradient" aria-hidden="true"></span>
-                <span class="key-gradient-labels"><span>Low</span><span>OA price</span><span>High</span></span>
-              </li>
-            </ul>
-          </div>
-        </aside>
-
-        <div class="housing-main">
-          <nav class="city-tabs" role="tablist" aria-label="Select case-study city">
-            <button type="button" class="city-tab is-active" data-city="Hull" role="tab" aria-selected="true">
-              <span class="city-tab-letter">A</span><span class="city-tab-name">Hull</span>
-            </button>
-            <button type="button" class="city-tab" data-city="York" role="tab" aria-selected="false">
-              <span class="city-tab-letter">B</span><span class="city-tab-name">York</span>
-            </button>
-            <button type="button" class="city-tab" data-city="Great Yarmouth" role="tab" aria-selected="false">
-              <span class="city-tab-letter">C</span><span class="city-tab-name">Great Yarmouth</span>
-            </button>
-            <button type="button" class="city-tab" data-city="Greater London" role="tab" aria-selected="false">
-              <span class="city-tab-letter">D</span><span class="city-tab-name">Greater London</span>
-            </button>
-          </nav>
-
-          <div class="housing-map-area" role="img" aria-label="Local flooding and housing map placeholder">
-            <span class="placeholder-frame-corner tl"></span>
-            <span class="placeholder-frame-corner tr"></span>
-            <span class="placeholder-frame-corner bl"></span>
-            <span class="placeholder-frame-corner br"></span>
-            <div class="placeholder-text-wrap">
-              <p class="placeholder-text">Local flooding × housing map</p>
-              <p class="placeholder-subtext"><span id="housing-selected-city">Hull</span> selected</p>
-            </div>
-          </div>
-
-          <div class="housing-trend" aria-label="House price annual trend">
-            <header class="trend-header">
-              <div>
-                <h4 class="trend-title">House Price · Annual Trend</h4>
-                <p class="trend-meta">Year-by-year median for the selected city</p>
-              </div>
-              <div class="trend-legend">
-                <span class="trend-legend-chip"><span class="trend-legend-dot"></span>Median price</span>
-              </div>
-            </header>
-            <div class="trend-placeholder">
-              <span class="placeholder-frame-corner tl"></span>
-              <span class="placeholder-frame-corner tr"></span>
-              <span class="placeholder-frame-corner bl"></span>
-              <span class="placeholder-frame-corner br"></span>
-              <div class="trend-axes">
-                <span class="trend-axis-y">price</span>
-                <span class="trend-axis-x">year</span>
-              </div>
-              <p class="placeholder-text trend-placeholder-text">Annual house-price trend chart</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <iframe
+        src="../CASA0029_project/index.html"
+        title="Local Flooding × Housing Interactive Map"
+        style="width:100%;height:82vh;min-height:620px;border:none;border-radius:16px;box-shadow:0 2px 24px rgba(0,0,0,.10);display:block;"
+        loading="lazy"
+        allowfullscreen
+      ></iframe>
     </div>
   </section>
 
