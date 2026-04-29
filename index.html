@@ -201,7 +201,8 @@
     ];
 
     const DATA_URLS = [
-      '../CASA0029_project/data/flood_price_compare_precomputed.json',
+      '../CASA0029_project/data/price_trend_by_zone.json',
+      'https://raw.githubusercontent.com/Levine-l/CASA0029_project/main/data/price_trend_by_zone.json',
     ];
 
     let trendData = null;
@@ -382,7 +383,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // City tab click handlers
+      // City tab click handlers (manual)
       document.getElementById('outer-city-tabs').addEventListener('click', e => {
         const btn = e.target.closest('.outer-city-btn');
         if (!btn) return;
@@ -390,6 +391,18 @@
         btn.classList.add('active');
         activeTrendKey = btn.dataset.trendKey;
         drawTrend(activeTrendKey);
+      });
+
+      // Sync with iframe navigate buttons via postMessage
+      window.addEventListener('message', e => {
+        if (!e.data || e.data.type !== 'cityChange') return;
+        const key = e.data.trendKey;
+        const btn = document.querySelector('.outer-city-btn[data-trend-key="' + key + '"]');
+        if (!btn) return;
+        document.querySelectorAll('.outer-city-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTrendKey = key;
+        if (trendData) drawTrend(activeTrendKey);
       });
 
       // Redraw on window resize
