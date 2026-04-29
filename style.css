@@ -1331,6 +1331,15 @@ html, body {
   opacity: 0.75;
 }
 
+.city-highlight {
+  color: var(--sapphire);
+  font-weight: 600;
+  background: rgba(64, 89, 173, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
 .chart-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
