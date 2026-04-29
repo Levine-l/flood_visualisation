@@ -438,6 +438,43 @@
     let projection;
     let currentDims = { width: 0, height: 0 };
 
+    // Lat ceiling for "England-focused" framing — excludes Scottish highlands
+    // / Northern Isles from the fit bounds so the initial view centres on
+    // England + Wales + the immediate Scottish border. Features above this
+    // are still drawn (they just fall outside the viewport and are clipped).
+    const FIT_LAT_MAX = 55.9;
+    function featureLatBBox(f) {
+      let yMin = Infinity, yMax = -Infinity;
+      (function walk(coords) {
+        if (typeof coords[0] === "number") {
+          if (coords[1] < yMin) yMin = coords[1];
+          if (coords[1] > yMax) yMax = coords[1];
+        } else coords.forEach(walk);
+      })(f.geometry.coordinates);
+      return { yMin, yMax };
+    }
+    const fitFeatures = geo.features.filter((f) => {
+      const { yMin, yMax } = featureLatBBox(f);
+      // Centroid latitude below the ceiling — keeps England + Wales + a
+      // touch of southern Scotland.
+      return (yMin + yMax) / 2 <= FIT_LAT_MAX;
+    });
+    const fitTarget = fitFeatures.length
+      ? { type: "FeatureCollection", features: fitFeatures }
+      : geo;
+
+    // ---- Centring knobs ----
+    // PAD_*: padding inside the container on each edge (px).
+    //   Increase one side to push the map AWAY from that edge.
+    // OFFSET_X / OFFSET_Y: extra translation applied AFTER fitExtent (px).
+    //   Positive X moves the map right; positive Y moves it down.
+    const PAD_TOP = 200;
+    const PAD_RIGHT = 60;
+    const PAD_BOTTOM = 1;
+    const PAD_LEFT = 1;
+    const OFFSET_X = -20;
+    const OFFSET_Y = 20;
+
     function sizeAndProject() {
       const rect = container.getBoundingClientRect();
       const width = Math.max(200, rect.width);
@@ -447,8 +484,16 @@
       svg.attr("viewBox", `0 0 ${width} ${height}`);
 
       // Use geoIdentity for UK-scale data — avoids the spherical-clip
-      // artifacts that geoMercator adds around each feature.
-      projection = d3.geoIdentity().reflectY(true).fitSize([width, height], geo);
+      // artifacts that geoMercator adds around each feature. Fit to the
+      // England-focused subset, then nudge with OFFSET_X/Y so the visible
+      // map (England + Wales) sits dead-centre in the frame.
+      projection = d3.geoIdentity().reflectY(true)
+        .fitExtent(
+          [[PAD_LEFT, PAD_TOP], [width - PAD_RIGHT, height - PAD_BOTTOM]],
+          fitTarget
+        );
+      const [tx, ty] = projection.translate();
+      projection.translate([tx + OFFSET_X, ty + OFFSET_Y]);
       pathGen.projection(projection);
 
       pathsGroup.selectAll("path.la-path").attr("d", pathGen);
@@ -481,7 +526,7 @@
     // Zoom behaviour
     const zoom = d3
       .zoom()
-      .scaleExtent([1, 20])
+      .scaleExtent([1, 15])
       .on("zoom", (event) => {
         viewGroup.attr("transform", event.transform);
         pathsGroup.selectAll("path.la-path").attr("stroke-width", 0.35 / event.transform.k);
@@ -497,7 +542,7 @@
       const { width, height } = currentDims;
       const scale = Math.min(
         12,
-        0.85 / Math.max(dx / width, dy / height)
+        5 / Math.max(dx / width, dy / height)
       );
       const tx = (width - scale * (x0 + x1)) / 2;
       const ty = (height - scale * (y0 + y1)) / 2;
