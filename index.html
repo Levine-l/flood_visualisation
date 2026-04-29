@@ -99,6 +99,31 @@
         loading="lazy"
         allowfullscreen
       ></iframe>
+
+      <!-- Standalone price trend chart -->
+      <div class="outer-trend-card" id="outer-trend-card">
+        <div class="outer-trend-header">
+          <div class="outer-trend-title" id="outer-trend-title">Price / m² Annual Trend</div>
+          <div class="outer-trend-subtitle" id="outer-trend-subtitle">Median GBP/m² by flood zone &mdash; select a city to begin</div>
+        </div>
+        <div class="outer-city-tabs" id="outer-city-tabs">
+          <button class="outer-city-btn active" data-trend-key="london" data-city-label="London">London</button>
+          <button class="outer-city-btn" data-trend-key="hull" data-city-label="Hull">Hull</button>
+          <button class="outer-city-btn" data-trend-key="york" data-city-label="York">York</button>
+          <button class="outer-city-btn" data-trend-key="great_yarmouth" data-city-label="Great Yarmouth">Great Yarmouth</button>
+        </div>
+        <div class="outer-canvas-wrap" id="outer-canvas-wrap">
+          <canvas id="outer-trend-canvas"></canvas>
+          <div class="outer-vline" id="outer-vline"></div>
+          <div class="outer-tt" id="outer-tt"></div>
+        </div>
+        <div class="outer-zone-legend">
+          <span class="outer-zone-item"><span class="outer-zone-dot" style="background:#ef4444"></span>Zone 3 — High risk</span>
+          <span class="outer-zone-item"><span class="outer-zone-dot" style="background:#f59e0b"></span>Zone 2 — Medium risk</span>
+          <span class="outer-zone-item"><span class="outer-zone-dot" style="background:#3b82f6"></span>No flood zone</span>
+        </div>
+        <div class="outer-trend-empty" id="outer-trend-empty" style="display:none">Loading data…</div>
+      </div>
     </div>
   </section>
 
@@ -162,5 +187,222 @@
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script src="script.js"></script>
+
+  <script>
+  /* ============================================================
+     STANDALONE PRICE TREND CHART
+     Data: ../CASA0029_project/data/flood_price_compare_precomputed.json
+     ============================================================ */
+  (function () {
+    const ZONE_CFG = [
+      { key: 'FZ3',      color: '#ef4444', label: 'Zone 3' },
+      { key: 'FZ2',      color: '#f59e0b', label: 'Zone 2' },
+      { key: 'no_flood', color: '#3b82f6', label: 'No flood' },
+    ];
+
+    const DATA_URLS = [
+      '../CASA0029_project/data/flood_price_compare_precomputed.json',
+    ];
+
+    let trendData = null;
+    let activeTrendKey = 'london';
+
+    async function loadTrendData() {
+      for (const url of DATA_URLS) {
+        try {
+          const r = await fetch(url);
+          if (!r.ok) continue;
+          trendData = await r.json();
+          return;
+        } catch (e) { /* try next */ }
+      }
+    }
+
+    function drawTrend(trendKey) {
+      const titleEl    = document.getElementById('outer-trend-title');
+      const subtitleEl = document.getElementById('outer-trend-subtitle');
+      const emptyEl    = document.getElementById('outer-trend-empty');
+      const wrapEl     = document.getElementById('outer-canvas-wrap');
+      const canvas     = document.getElementById('outer-trend-canvas');
+      const btnEl      = document.querySelector(
+        '.outer-city-btn[data-trend-key="' + trendKey + '"]');
+      const cityLabel  = btnEl ? btnEl.dataset.cityLabel : trendKey;
+
+      titleEl.textContent    = cityLabel + ' · Price / m² Trend';
+      subtitleEl.textContent = cityLabel + ' · Median GBP/m² by flood zone';
+
+      const cityData = trendData && trendData.cities && trendData.cities[trendKey];
+      if (!cityData) {
+        canvas.style.display = 'none';
+        emptyEl.style.display = '';
+        emptyEl.textContent = trendData ? 'No data for this city.' : 'Data failed to load.';
+        return;
+      }
+      canvas.style.display = '';
+      emptyEl.style.display = 'none';
+      _drawCanvas(canvas, wrapEl, cityData);
+    }
+
+    function _drawCanvas(canvas, wrap, cityData) {
+      const dpr  = Math.min(window.devicePixelRatio || 1, 2);
+      const cssW = wrap.clientWidth || 700;
+      const cssH = 240;
+      canvas.width  = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width  = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      const P = { top: 14, right: 12, bottom: 30, left: 52 };
+      const cW = cssW - P.left - P.right;
+      const cH = cssH - P.top  - P.bottom;
+      const years = cityData.years;
+
+      const allVals = [];
+      for (const zc of ZONE_CFG) {
+        (cityData[zc.key] || []).forEach(v => { if (v != null) allVals.push(v); });
+      }
+      if (!allVals.length) return;
+
+      const rawMin = Math.min(...allVals);
+      const rawMax = Math.max(...allVals);
+      const vpad   = (rawMax - rawMin) * 0.12 || rawMax * 0.1;
+      const yMin   = Math.max(0, rawMin - vpad);
+      const yMax   = rawMax + vpad;
+      const xMin   = years[0];
+      const xMax   = years[years.length - 1];
+
+      function xp(yr)  { return P.left + (yr - xMin) / (xMax - xMin) * cW; }
+      function yp(val) { return P.top  + (1 - (val - yMin) / (yMax - yMin)) * cH; }
+
+      // Y gridlines + labels
+      for (let i = 0; i <= 5; i++) {
+        const v = yMin + (yMax - yMin) * i / 5;
+        const y = yp(v);
+        ctx.strokeStyle = 'rgba(107,154,196,0.15)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(P.left, y); ctx.lineTo(P.left + cW, y); ctx.stroke();
+        ctx.fillStyle = '#5b6b82';
+        ctx.font = '11px Inter,system-ui,sans-serif';
+        ctx.textAlign = 'right';
+        const lbl = v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : Math.round(v).toString();
+        ctx.fillText(lbl, P.left - 6, y + 4);
+      }
+
+      // X baseline
+      ctx.strokeStyle = 'rgba(107,154,196,0.25)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(P.left, P.top + cH); ctx.lineTo(P.left + cW, P.top + cH); ctx.stroke();
+
+      // X labels
+      const step = years.length > 14 ? 4 : years.length > 8 ? 3 : 2;
+      ctx.fillStyle = '#5b6b82';
+      ctx.font = '11px Inter,system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      years.forEach((yr, i) => {
+        if (i % step !== 0 && i !== years.length - 1) return;
+        ctx.fillText(String(yr), xp(yr), P.top + cH + 20);
+      });
+
+      // Zone lines + dots
+      for (const zc of ZONE_CFG) {
+        const vals = cityData[zc.key];
+        if (!vals) continue;
+        ctx.strokeStyle = zc.color;
+        ctx.lineWidth = 2.2;
+        ctx.lineJoin = 'round';
+        ctx.lineCap  = 'round';
+        ctx.globalAlpha = 0.92;
+        ctx.beginPath();
+        let started = false;
+        years.forEach((yr, i) => {
+          const v = vals[i];
+          if (v == null) { started = false; return; }
+          if (!started) { ctx.moveTo(xp(yr), yp(v)); started = true; }
+          else ctx.lineTo(xp(yr), yp(v));
+        });
+        ctx.stroke();
+        ctx.fillStyle = zc.color;
+        ctx.globalAlpha = 0.75;
+        years.forEach((yr, i) => {
+          const v = vals[i];
+          if (v == null) return;
+          ctx.beginPath();
+          ctx.arc(xp(yr), yp(v), 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+      ctx.globalAlpha = 1;
+
+      canvas._outerMeta = { years, cityData, xMin, xMax, yMin, yMax, P, cW, cH };
+    }
+
+    function initTooltip() {
+      const canvas = document.getElementById('outer-trend-canvas');
+      const vline  = document.getElementById('outer-vline');
+      const tt     = document.getElementById('outer-tt');
+      const wrap   = document.getElementById('outer-canvas-wrap');
+
+      canvas.addEventListener('mousemove', e => {
+        const m = canvas._outerMeta;
+        if (!m) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const { years, cityData, xMin, xMax, P, cW } = m;
+        if (mx < P.left || mx > P.left + cW) {
+          vline.style.display = 'none'; tt.style.display = 'none'; return;
+        }
+        const frac = (mx - P.left) / cW;
+        const idx  = Math.min(years.length - 1, Math.max(0, Math.round(frac * (years.length - 1))));
+        const yr   = years[idx];
+        const xPx  = P.left + (yr - xMin) / (xMax - xMin) * cW;
+
+        vline.style.left    = xPx + 'px';
+        vline.style.display = 'block';
+
+        let html = '<span style="font-weight:700;color:#f1f5f9">' + yr + '</span>';
+        for (const zc of ZONE_CFG) {
+          const v = cityData[zc.key] && cityData[zc.key][idx];
+          if (v == null) continue;
+          html += '<br><span style="color:' + zc.color + '">' + zc.label + '</span>: £' + Math.round(v).toLocaleString('en-GB') + '/m²';
+        }
+        tt.innerHTML    = html;
+        tt.style.display = 'block';
+        const wrapW = wrap.clientWidth;
+        const ttW   = tt.offsetWidth || 130;
+        tt.style.left = (xPx + 10 + ttW > wrapW ? xPx - ttW - 10 : xPx + 10) + 'px';
+        tt.style.top  = '6px';
+      });
+      canvas.addEventListener('mouseleave', () => {
+        vline.style.display = 'none'; tt.style.display = 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // City tab click handlers
+      document.getElementById('outer-city-tabs').addEventListener('click', e => {
+        const btn = e.target.closest('.outer-city-btn');
+        if (!btn) return;
+        document.querySelectorAll('.outer-city-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTrendKey = btn.dataset.trendKey;
+        drawTrend(activeTrendKey);
+      });
+
+      // Redraw on window resize
+      window.addEventListener('resize', () => {
+        if (trendData) drawTrend(activeTrendKey);
+      });
+
+      initTooltip();
+
+      await loadTrendData();
+      drawTrend(activeTrendKey);
+    });
+  })();
+  </script>
 </body>
 </html>

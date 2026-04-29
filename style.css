@@ -1615,3 +1615,129 @@ html, body {
   font-size: 0.9rem;
   z-index: 200;
 }
+
+
+/* ============================================================
+   PRICE TREND CHART CARD (standalone below map iframe)
+   ============================================================ */
+.outer-trend-card {
+  margin-top: 28px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 28px 32px 24px;
+}
+
+.outer-trend-header {
+  margin-bottom: 16px;
+}
+
+.outer-trend-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--sapphire);
+  margin-bottom: 4px;
+}
+
+.outer-trend-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.outer-city-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.outer-city-btn {
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--blue-grey);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.outer-city-btn:hover {
+  background: rgba(64, 89, 173, 0.07);
+  border-color: var(--sapphire);
+  color: var(--sapphire);
+}
+
+.outer-city-btn.active {
+  background: var(--sapphire);
+  border-color: var(--sapphire);
+  color: #fff;
+}
+
+.outer-canvas-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.outer-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+}
+
+.outer-vline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(64, 89, 173, 0.35);
+  pointer-events: none;
+  display: none;
+}
+
+.outer-tt {
+  position: absolute;
+  background: var(--text-main);
+  color: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  pointer-events: none;
+  display: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  z-index: 10;
+}
+
+.outer-zone-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.outer-zone-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.outer-zone-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.outer-trend-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 40px 0;
+}
